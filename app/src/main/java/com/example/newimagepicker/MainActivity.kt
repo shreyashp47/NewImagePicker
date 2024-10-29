@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
@@ -17,13 +18,16 @@ import androidx.activity.result.registerForActivityResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import java.io.File
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var image: ImageView
     lateinit var singleButton: Button
     lateinit var multipleButton: Button
+    lateinit var upload: Button
     lateinit var videoCheckBox: CheckBox
     lateinit var imageCheckBox: CheckBox
+    lateinit var filePath: TextView
     var isVideo = false
     var isImage = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,19 +40,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             insets
         }
         image = findViewById(R.id.image)
+        filePath = findViewById(R.id.filePath)
         singleButton = findViewById(R.id.single_button)
         multipleButton = findViewById(R.id.multiple_button)
         videoCheckBox = findViewById(R.id.video_checkbox)
         imageCheckBox = findViewById(R.id.image_checkbox)
+        upload = findViewById(R.id.upload)
         imageCheckBox.setOnCheckedChangeListener { buttonView, isChecked -> isImage = isChecked }
         videoCheckBox.setOnCheckedChangeListener { buttonView, isChecked -> isVideo = isChecked }
         singleButton.setOnClickListener(this)
         multipleButton.setOnClickListener(this)
+        upload.setOnClickListener(this)
     }
 
     val picker = registerForActivityResult(PickVisualMedia()) { uri ->
         if (uri != null) {
             Log.d("PhotoPicker", "Selected URI: $uri")
+            filePath.text = uri.toString()
         } else {
             Log.d("PhotoPicker", "No media selected")
         }
@@ -88,9 +96,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.multiple_button -> {
                 pickMultipleMedia.launch(PickVisualMediaRequest(type))
             }
+            R.id.upload -> {
+                val path = filePath.text.toString()
+                uploadFile(path)
+            }
             else -> {
 
             }
         }
+    }
+
+    private fun uploadFile(path :String) {
+        val imageFile = File(path)
+        uploadImageToImgBB(imageFile)
     }
 }
